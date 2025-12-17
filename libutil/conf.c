@@ -425,6 +425,28 @@ replace_variables(STRBUF *sb)
 	recursive_call--;
 }
 /**
+ * 将字符串追加写入 D:\log.txt 文件
+ * @param str 要写入的字符串（不能为 NULL）
+ * @return 0 表示成功，-1 表示失败
+ */
+int append_to_log(const char* str) {
+    if (str == NULL) {
+        return -1; // 防止空指针
+    }
+
+    FILE* fp = fopen("D:\\log.txt", "a"); // 以追加模式打开文件
+    if (fp == NULL) {
+        return -1; // 打开文件失败（如权限不足、路径无效等）
+    }
+
+    // 写入字符串（不自动换行，可根据需要添加）
+    fputs(str, fp);
+    fputc('\n', fp); // 可选：每条日志单独一行
+
+    fclose(fp);
+    return 0; // 成功
+}
+/**
  * getconfs: get property string
  *
  *	@param[in]	name	property name
@@ -449,6 +471,9 @@ getconfs(const char *name, STRBUF *result)
 			strbuf_puts(result, config_path);
 		return 1;
 	}
+	if (strcmp(name, "ctagscom") == 0) {
+        append_to_log("libutil/conf.c: getconfs(ctagscom) start ...");
+    }
 	sb = strbuf_open(0);
 	if (!strcmp(name, "skip") || !strcmp(name, "gtags_parser") || !strcmp(name, "langmap"))
 		all = 1;
@@ -525,6 +550,10 @@ getconfs(const char *name, STRBUF *result)
 		strbuf_puts(result, !strcmp(name, "langmap") ? 
 			trim_langmap(strbuf_value(sb)) :
 			strbuf_value(sb));
+	if (strcmp(name, "ctagscom") == 0) {
+        append_to_log("libutil/conf.c: getconfs(ctagscom) : contents");
+        append_to_log(strbuf_value(sb));
+    }
 	strbuf_close(sb);
 	return exist;
 }

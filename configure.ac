@@ -360,6 +360,45 @@ AC_DEFINE_UNQUOTED(EXUBERANT_CTAGS, "$EXUBERANT_CTAGS", [Exuberant Ctags program
 AC_DEFINE_UNQUOTED(UNIVERSAL_CTAGS, "$UNIVERSAL_CTAGS", [Universal Ctags program.])
 AC_SUBST(EXUBERANT_CTAGS)
 AC_SUBST(UNIVERSAL_CTAGS)
+dnl# 检测是否在 MSYS/Cygwin/MinGW 环境，并准备 cygpath
+AC_MSG_CHECKING([whether to convert paths for Windows])
+AS_CASE([$host_os],
+    [*cygwin* | *mingw* | *msys*],
+    [
+        AC_MSG_RESULT([yes])
+        AC_PATH_PROG([CYGPATH], [cygpath], [:])
+    ],
+    [
+        AC_MSG_RESULT([no])
+        CYGPATH=:
+    ]
+)
+
+dnl# 定义一个 shell 函数用于路径转换（在 configure 运行时生效）
+dnl AC_CONFIG_COMMANDS_PRE([
+dnl     win_path() {
+dnl         if test "x$CYGPATH" != "x:"; then
+dnl             $CYGPATH -m "$1"
+dnl         else
+dnl             echo "$1"
+dnl         fi
+dnl     }
+dnl ])
+dnl 计算原始 POSIX 路径（例如 datadir 下的 global 子目录）
+dnl gtags_data_dir="${datadir}/global"
+
+dnl 转换为 Windows 路径（在 configure 执行时）
+AS_IF([test "x$CYGPATH" != "x:"], [
+    EXUBERANT_CTAGS_WIN=`$CYGPATH -m "$EXUBERANT_CTAGS" | sed 's/:/\\:/'`
+    UNIVERSAL_CTAGS_WIN=`$CYGPATH -m "$UNIVERSAL_CTAGS" | sed 's/:/\\:/'`
+], [
+    EXUBERANT_CTAGS_WIN="$EXUBERANT_CTAGS"
+    UNIVERSAL_CTAGS_WIN="$UNIVERSAL_CTAGS"
+])
+
+dnl 导出给 .in 文件替换使用
+AC_SUBST(EXUBERANT_CTAGS_WIN)
+AC_SUBST(UNIVERSAL_CTAGS_WIN)
 
 dnl
 dnl for POSIX sort program.

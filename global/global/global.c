@@ -54,6 +54,12 @@
 #include "literal.h"
 #include "convert.h"
 
+#ifdef _WIN32
+static inline int unsetenv(const char *name) {
+    return _putenv_s(name, "");
+}
+#endif
+
 /*
  * enable [set] globbing, if available
  */

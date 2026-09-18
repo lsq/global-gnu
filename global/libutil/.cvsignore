@@ -1,0 +1,5 @@
+.deps
+Makefile
+Makefile.in
+langmap.h
+gtags.conf.5
